@@ -82,6 +82,20 @@ class DBStorage:
             if obj.id == id:
                 return obj
 
+    def get_active_users(self):
+        """Returun all active users only"""
+        users = self.all(User)
+        active_users = {key: user for key, user in users.items() if user.deleted_at is None}
+        return active_users
+    
+    def get_engine(self):
+        """Returns the engine"""
+        return self.__engine
+
+    def get_meta(self):
+        """Returns the metadata"""
+        return Base.metadata
+
     def count(self, cls=None):
         """Returns the number of objects in storage"""
         return len(self.all(cls))
