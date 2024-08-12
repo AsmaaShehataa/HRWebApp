@@ -65,7 +65,8 @@ def get_users():
             'phone': user.phone,
             'department': user.department,
             'start_date': user.start_date.isoformat(),
-            'role': user.role
+            'role': user.role,
+            'deleted_at': user.deleted_at.isoformat() if user.deleted_at else None
         }
             users_list.append(user_dict)
             print("Data retrieved successfully")
