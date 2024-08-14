@@ -1,4 +1,11 @@
-# created by virtualenv automatically
+# Ignore Python bytecode
 __pycache__/
-venvHR/*
+*.py[cod]
+
+# Ignore virtual environments
+venvHR/
+Basicwebappenv/
+myenv/
+
+# Ignore environment variables
 .env
