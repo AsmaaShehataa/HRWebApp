@@ -19,5 +19,6 @@ pip install -r requirements.txt
 
 To start the app
 ```
-python3 -m web_flask.app
+export FLASKAPP=app
+flask run 
 ```
