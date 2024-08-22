@@ -7,7 +7,7 @@ from flask import Flask
 
 logger = logging.getLogger(__name__)
 
-bpuser = Blueprint('bpuser', __name__, url_prefix='/HrWeb/user')
+bpuser = Blueprint('bpuser', __name__, url_prefix='/employees')
 
 
 @bpuser.route('/all', methods=['GET'])

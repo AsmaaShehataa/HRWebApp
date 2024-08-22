@@ -3,7 +3,7 @@
 
 from flask import Blueprint
 
-bpuser = Blueprint('bpuser', __name__, url_prefix='/HrWeb/user')
+bpuser = Blueprint('bpuser', __name__, url_prefix='/employees')
 
 # Example route
 @bpuser.route('/example')
