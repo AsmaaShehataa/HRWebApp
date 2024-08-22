@@ -6,6 +6,7 @@ __pycache__/
 venvHR/
 Basicwebappenv/
 myenv/
+mynewenv/
 
 # Ignore environment variables
 .env
