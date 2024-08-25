@@ -2,7 +2,7 @@
 """Admin seeder"""
 
 from models import storage
-from models.user import User
+from models.employees import Employee
 from datetime import datetime
 import hashlib
 import logging
@@ -21,7 +21,7 @@ class AdminSeeder():
     def seed(self):
         """Seed the database with an admin user"""
         # delete user if exists to avoid duplicates
-        existing_users = storage.all(User)
+        existing_users = storage.all(Employee)
         for user in existing_users.values():
           if user.email in ["admin@example.com", "alice.smith@example.com", "bob.john@example.com"]:
             storage.delete(user)
@@ -32,7 +32,7 @@ class AdminSeeder():
         user_password = hashlib.md5("user_password".encode()).hexdigest()
 
         # Create an admin user
-        self.admin = User(  #instance variable
+        self.admin = Employee(  #instance variable
             name="Admin",
             email="admin@example.com",
             password=admin_password,
@@ -44,7 +44,7 @@ class AdminSeeder():
         )
         
         # Create a regular user
-        self.regular_user = User(
+        self.regular_user = Employee(
             name="Alice Smith",
             email="alice.smith@example.com",
             password=user_password,
@@ -56,7 +56,7 @@ class AdminSeeder():
         )
         
         # 1 more user for testing
-        user2 = User( # local variable
+        user2 = Employee( # local variable
             name="Bob Johnson",
             email="bob.john@example.com",
             password=user_password,

@@ -8,11 +8,11 @@ from dotenv import load_dotenv
 from sqlalchemy.orm import sessionmaker, scoped_session
 import models
 from models.base_model import BaseModel, Base
-from models.user import User
+from models.employees import Employee
 
 load_dotenv() # to take the variables from .env
 
-classes = {"User": User}
+classes = {"Employee": Employee}
 
 class DBStorage:
     """Class to interact with the MySQL database"""
@@ -84,7 +84,7 @@ class DBStorage:
 
     def get_active_users(self):
         """Returun all active users only"""
-        users = self.all(User)
+        users = self.all(Employee)
         active_users = {key: user for key, user in users.items() if user.deleted_at is None}
         return active_users
     

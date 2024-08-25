@@ -12,6 +12,9 @@ from models import storage
 import logging
 from config import Config
 from web_flask.routes import register_routes
+from models.settings import Settings
+from models.employees import Employee
+from models.admin import Admin
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

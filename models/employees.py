@@ -5,14 +5,15 @@ import models
 from models.base_model import BaseModel, Base
 from os import getenv
 import sqlalchemy
-from sqlalchemy import Column, String, Integer, DateTime
+from sqlalchemy.orm import relationship
+from sqlalchemy import Column, String, Integer, DateTime, BLOB
 import hashlib
 from datetime import datetime
 
 
-class User(BaseModel, Base):
-    """User class"""
-    __tablename__ = 'users'
+class Employee(BaseModel, Base):
+    """Employee class"""
+    __tablename__ = 'employees'
     name = Column(String(128), nullable=False)
     email = Column(String(128), nullable=False)
     password = Column(String(128), nullable=False)
@@ -21,7 +22,12 @@ class User(BaseModel, Base):
     start_date = Column(DateTime, nullable=False)
     salary = Column(String(128), nullable=False)
     role = Column(Integer, default=0, nullable=False)
+    photo = Column(String(250), nullable=True)
     deleted_at = Column(DateTime, nullable=True, default=None) # Soft Delete
+
+    # its 1:1 relationship but but one way direction (admin -> employee)
+    # admin can access employee but employee atts can't access admin
+    admin = relationship('Admin', back_populates='employees')
 
 # Hashing the password
 

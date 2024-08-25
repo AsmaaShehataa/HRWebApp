@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, abort
 from models import storage
-from models.user import User
+from models.employees import Employee
 import logging
 from flask import Flask
 
@@ -13,7 +13,7 @@ bpuser = Blueprint('bpuser', __name__, url_prefix='/employees')
 @bpuser.route('/all', methods=['GET'])
 def get_users():
     """Get all users"""
-    users = storage.all(User).values()
+    users = storage.all(Employee).values()
     users_list = [
         {
             'id': user.id,
@@ -34,7 +34,7 @@ def get_users():
 @bpuser.route('/active', methods=['GET'])
 def get_active_users():
     """Get all active users only"""
-    users = storage.all(User).values()
+    users = storage.all(Employee).values()
     active_users_list = [
         {
             'id': user.id,
