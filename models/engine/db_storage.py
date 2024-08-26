@@ -9,6 +9,7 @@ from sqlalchemy.orm import sessionmaker, scoped_session
 import models
 from models.base_model import BaseModel, Base
 from models.employees import Employee
+from models.admin import Admin
 
 load_dotenv() # to take the variables from .env
 

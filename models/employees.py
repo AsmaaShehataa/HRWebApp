@@ -1,12 +1,12 @@
 #!/usr/bin/python3
-"""User model"""
+"""Employee model"""
 
 import models
 from models.base_model import BaseModel, Base
 from os import getenv
 import sqlalchemy
 from sqlalchemy.orm import relationship
-from sqlalchemy import Column, String, Integer, DateTime, BLOB
+from sqlalchemy import Column, String, Integer, DateTime, BLOB, ForeignKey
 import hashlib
 from datetime import datetime
 
@@ -24,6 +24,7 @@ class Employee(BaseModel, Base):
     role = Column(Integer, default=0, nullable=False)
     photo = Column(String(250), nullable=True)
     deleted_at = Column(DateTime, nullable=True, default=None) # Soft Delete
+    admin_id = Column(String(60), ForeignKey('admins.id'), nullable=False)
 
     # its 1:1 relationship but but one way direction (admin -> employee)
     # admin can access employee but employee atts can't access admin

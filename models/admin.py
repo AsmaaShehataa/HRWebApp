@@ -19,8 +19,7 @@ class Admin(BaseModel, Base):
     password = Column(String(128), nullable=False)
     role = Column(Integer, default=1, nullable=False)
     deleted_at = Column(DateTime, nullable=True, default=None) # Soft Delete
-    admin_id = Column(String(60), ForeignKey('employees.id'), primary_key=True, nullable=False)
-    employee = relationship('Employee', back_populates='admin')
+    employees = relationship('Employee', back_populates='admin')
 
     def __init__(self, *args, **kwargs):
         """Initialize the Admin instance"""
