@@ -3,6 +3,7 @@
 
 from models import storage
 from models.employees import Employee
+from models.admin import Admin
 from datetime import datetime
 import hashlib
 import logging
@@ -16,7 +17,8 @@ class AdminSeeder():
 
     def __init__(self):
         """Initialize the AdminSeeder instance"""
-        self.users = []
+        self.admins = []
+        self.employees = []
 
     def seed(self):
         """Seed the database with an admin user"""
@@ -32,19 +34,15 @@ class AdminSeeder():
         user_password = hashlib.md5("user_password".encode()).hexdigest()
 
         # Create an admin user
-        self.admin = Employee(  #instance variable
+        self.admin = Admin(  #instance variable
             name="Admin",
             email="admin@example.com",
             password=admin_password,
-            phone="1234567890",
-            department="HR",
-            start_date=datetime(2024, 8, 1),
-            salary="100000",
             role=1
         )
         
         # Create a regular user
-        self.regular_user = Employee(
+        self.employees.append(Employee(
             name="Alice Smith",
             email="alice.smith@example.com",
             password=user_password,
@@ -52,11 +50,12 @@ class AdminSeeder():
             department="Engineering",
             start_date=datetime(2024, 8, 1),
             salary="80000",
-            role=0
-        )
+            role=0,
+            admin_id=self.admin.id  # Assign to the created admin
+        ))
         
         # 1 more user for testing
-        user2 = Employee( # local variable
+        self.employees.append(Employee(
             name="Bob Johnson",
             email="bob.john@example.com",
             password=user_password,
@@ -64,22 +63,22 @@ class AdminSeeder():
             department="Finance",
             start_date=datetime(2024, 8, 1),
             salary="50000",
-            role=0
-        )
-        # adding users to the empty list 
-        # self.users.append(self.admin)
-        # self.users.append(self.regular_user)
-        # self.users.append(user2)
-        self.users.extend([self.admin, self.regular_user, user2])
-        
-        for user in self.users:
-          storage.new(user)
-          if user.role == 1:
-            logger.info(f"Welcome Admin user: {user.name}")
+            role=0,
+            admin_id=self.admin.id
+        ))
+
+        # Save the admins and employees
+        storage.new(self.admin)
+        for employee in self.employees:
+          storage.new(employee)
+          if employee.role == 1:
+            logger.info(f"Welcome Admin user: {employee.name}")
           else:
-            logger.info(f"Welcome Regular user: {user.name}")
+            logger.info(f"Welcome Regular user: {employee.name}")
         storage.save()
-        logger.info("Users saved successfully")
+        #logger.info("Users saved successfully")
+        logger.info(f"Admin ID: {self.admin.id}")
+
 
 if __name__ == "__main__":
   seeder = AdminSeeder()
