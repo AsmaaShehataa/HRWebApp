@@ -15,3 +15,4 @@ class Config:
         os.getenv('HR_MYSQL_DB')
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    WTF_CSRF_ENABLED = False

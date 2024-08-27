@@ -35,7 +35,7 @@ load_dotenv()
 # print(os.getenv('HR_MYSQL_DB'))
 
 app = Flask(__name__)
-app.config.from_object('config')
+app.config.from_object(Config)
 
 # Register routes
 register_routes(app)
