@@ -25,7 +25,9 @@ employee_bp = Blueprint('employee_bp', __name__, url_prefix='/employees')
 def get_employees():
     """Get all employees"""
     employee_list = storage.all(Employee)
+    logger.info('Employees retrieved successfully')
     return jsonify([employee.to_dict() for employee in employee_list.values()])
+
 
 @employee_bp.route('/new', methods=['POST'])
 def add_employee():
