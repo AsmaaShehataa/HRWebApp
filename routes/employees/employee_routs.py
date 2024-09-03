@@ -8,30 +8,55 @@ import logging
 from flask import Flask
 from web_flask.forms import EmployeeForm
 import os
+from werkzeug.security import generate_password_hash
+import jwt
+from config import Config
+from functools import wraps
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 employee_bp = Blueprint('employee_bp', __name__, url_prefix='/employees')
 
-# file_path = 'web_flask/static'
-# Allowed_Extensions = {'png', 'jpg'}
-# Max_Length = 1 * 1024 * 1024 # 1MB
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth_header = request.headers.get('Authorization')
+        if not auth_header:
+            return jsonify({'error': 'Token is missing'}), 403
+        
+        try:
+            token = auth_header.split(" ")[1]
+            data = jwt.decode(token, Config.SECRET_KEY, algorithms=['HS256'])
+            admin = storage.filter_by(Admin, email=data['email'])
+            logger.info(f"Decoded email from token: {data['email']}")
+            current_user = storage.filter_by(Admin, email=data['email'])
 
-# def allowed_file(filename):
-#     return '.' in filename and filename.rsplit('.', 1)[1].lower() in Allowed_Extensions
+            if not current_user:
+                return jsonify({'error': 'User not found'}), 403
+        except Exception as e:
+            logger.error('Token is invalid')
+            return jsonify({'error': 'Token is invalid'}), 403
+        return f(current_user[0], *args, **kwargs)
+    return decorated
 
 @employee_bp.route('/', methods=['GET'])
-def get_employees():
-    """Get all employees"""
+@token_required
+def get_employees(): #work with token
     employee_list = storage.all(Employee)
     logger.info('Employees retrieved successfully')
     return jsonify([employee.to_dict() for employee in employee_list.values()])
 
 
 @employee_bp.route('/new', methods=['POST'])
-def add_employee():
+@token_required
+def add_employee(current_user): #work with token
     """Add new employee"""
+    # cehck if the user is an admin
+    logger.info(f"Current user: {current_user}")
+    if current_user.role != 1:
+        return jsonify({'message': 'Your are Not authorized to perform this action'}), 403
+    
     form = EmployeeForm()
     if not form.validate_on_submit():
         return jsonify({"errors": form.errors}), 400
@@ -58,12 +83,10 @@ def add_employee():
         'department': form.department.data,
         'start_date': form.start_date.data,
         'salary': form.salary.data,
-        'role': form.role.data,
-        'admin_id': form.admin_id.data
         # 'photo': photo_url
     }
 
-    required_fields = ['name', 'email', 'password', 'phone', 'department', 'start_date', 'salary', 'role', 'admin_id']
+    required_fields = ['name', 'email', 'password', 'phone', 'department', 'start_date', 'salary']
     for field in required_fields:
         if field not in data or not data[field]:
             abort(400, 'Missing {}'.format(field))
@@ -76,6 +99,7 @@ def add_employee():
             return jsonify({"error": "Employee already exists"}), 400
 
     new_employee = Employee(**data)
+    new_employee.password = generate_password_hash(data['password'])
     new_employee.save()
     logger.info('Employee added successfully')
     flash('Employee added successfully', 'success')

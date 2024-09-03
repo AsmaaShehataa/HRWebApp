@@ -1,6 +1,6 @@
 #!/usr/bin/python3
-"""Forms for employees validation"""
-from wtforms import Form, StringField, IntegerField, validators, DateField
+"""Forms for employees and admins validation"""
+from wtforms import Form, StringField, IntegerField, validators, DateField, PasswordField
 from flask_wtf import FlaskForm
 from wtforms.validators import DataRequired, Email, Length, NumberRange, Regexp
 import re
@@ -14,6 +14,24 @@ class EmployeeForm(FlaskForm):
     department = StringField('Department', validators=[DataRequired()])
     start_date = DateField('Start Date', format='%Y-%m-%d', validators=[DataRequired()])
     salary = IntegerField('Salary', validators=[DataRequired(), NumberRange(min=1, message='Salary must be a positive number')])
-    role = StringField('Role', validators=[DataRequired()])
+    #role = StringField('Role', validators=[DataRequired()])
     #photo = StringField('Photo', validators=[DataRequired()])
-    admin_id = StringField('Admin ID', validators=[DataRequired()])
+    #admin_id = StringField('Admin ID', validators=[DataRequired()])
+
+
+class LoginForm(FlaskForm):
+    """Login Form"""
+    email = StringField('Email', validators=[DataRequired(), Email(), Regexp(r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$', message='Invalid email')])
+    password = StringField('Password', validators=[DataRequired(), Length(min=6)])
+
+class AdminForm(FlaskForm):
+    """Admin Form"""
+    name = StringField('Name', validators=[DataRequired(), Length(min=3, max=20)])
+    email = StringField('Email', validators=[DataRequired(), Email(), Regexp(r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$', message='Invalid email')])
+    password = StringField('Password', validators=[DataRequired(), Length(min=6)])
+    role = IntegerField('Role', validators=[DataRequired(), NumberRange(min=0, max=1, message='Role must be 0 or 1')])
+
+class AdminLoginForm(FlaskForm):
+    """Admin Login Form"""
+    email = StringField('Email', validators=[DataRequired(), Email(), Regexp(r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$', message='Invalid email')])
+    password = StringField('Password', validators=[DataRequired(), Length(min=6)])

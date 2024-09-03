@@ -7,16 +7,18 @@ from sqlalchemy.orm import relationship
 from models.base_model import BaseModel, Base
 from models.employees import Employee
 import models
+from flask_sqlalchemy import SQLAlchemy
 import hashlib
 from datetime import datetime
 
+db = SQLAlchemy()
 
 class Admin(BaseModel, Base):
     """Admin class"""
     __tablename__ = 'admins'
-    name = Column(String(128), nullable=False)
+    name = Column(String(128), nullable=True)
     email = Column(String(128), nullable=False)
-    password = Column(String(128), nullable=False)
+    password = Column(String(256), nullable=False)
     role = Column(Integer, default=1, nullable=False)
     deleted_at = Column(DateTime, nullable=True, default=None) # Soft Delete
     employees = relationship('Employee', back_populates='admin')
@@ -29,11 +31,11 @@ class Admin(BaseModel, Base):
                 if key != "__class__":
                     setattr(self, key, value)
 
-    def __setattr__(self, name, value):
-        """Set the password increypted"""
-        if name == "password":
-            value = hashlib.md5(value.encode()).hexdigest()
-        super().__setattr__(name, value)
+    # def __setattr__(self, name, value):
+    #     """Set the password increypted"""
+    #     if name == "password":
+    #         value = hashlib.md5(value.encode()).hexdigest()
+    #     super().__setattr__(name, value)
 
     def verify_password(self, entered_password):
         """Verify the password"""

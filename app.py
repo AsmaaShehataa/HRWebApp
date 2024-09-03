@@ -7,7 +7,6 @@ from dotenv import load_dotenv
 from flask import Flask
 from flask_migrate import Migrate
 from flask_seeder import FlaskSeeder
-#from web_flask.blueprints.bpuser import bpuser
 from models import storage
 import logging
 from config import Config
@@ -15,6 +14,8 @@ from routes import register_routes
 from models.settings import Settings
 from models.employees import Employee
 from models.admin import Admin
+#from models.auth import User, Role
+from routes.auth.auth_routes import auth_bp
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

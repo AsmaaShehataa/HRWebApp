@@ -9,22 +9,26 @@ from sqlalchemy.orm import relationship
 from sqlalchemy import Column, String, Integer, DateTime, BLOB, ForeignKey
 import hashlib
 from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_sqlalchemy import SQLAlchemy
 
+
+db = SQLAlchemy()
 
 class Employee(BaseModel, Base):
     """Employee class"""
     __tablename__ = 'employees'
-    name = Column(String(128), nullable=False)
+    name = db.Column(String(128), nullable=False)
     email = Column(String(128), nullable=False)
-    password = Column(String(128), nullable=False)
+    password = Column(String(255), nullable=False)
     phone = Column(String(128), nullable=False)
     department = Column(String(128), nullable=False)
     start_date = Column(DateTime, nullable=False)
-    salary = Column(String(128), nullable=False)
+    salary = Column(Integer, nullable=False)
     role = Column(Integer, default=0, nullable=False)
     photo = Column(String(250), nullable=True)
     deleted_at = Column(DateTime, nullable=True, default=None) # Soft Delete
-    admin_id = Column(String(60), ForeignKey('admins.id'), nullable=False)
+    admin_id = Column(String(60), ForeignKey('admins.id'), nullable=True)
 
     # its 1:1 relationship but but one way direction (admin -> employee)
     # admin can access employee but employee atts can't access admin
@@ -36,16 +40,21 @@ class Employee(BaseModel, Base):
         """Initialize the User instance"""
         super().__init__(*args, **kwargs)
 
-    def __setattr__(self, name, value):
-        """Set the password increypted"""
-        if name == "password":
-            value = hashlib.md5(value.encode()).hexdigest()
-        super().__setattr__(name, value)
+    # def __setattr__(self, name, value):
+    #     """Set the password increypted"""
+    #     if name == "password":
+    #         value = hashlib.md5(value.encode()).hexdigest()
+    #     super().__setattr__(name, value)
 
-    def verify_password(self, entered_password):
-        """Verify the password"""
-        entered_md5_hash= hashlib.md5(entered_password.encode()).hexdigest()
-        return entered_md5_hash == self.password
+    # def verify_password(self, entered_password):
+    #     """Verify the password"""
+    #     entered_md5_hash= hashlib.md5(entered_password.encode()).hexdigest()
+    #     return entered_md5_hash == self.password
+    
+    
+    def verify_password(self, password):
+        return check_password_hash(self.password, password)
+
 
     def soft_del(self):
         """Soft delete the user"""

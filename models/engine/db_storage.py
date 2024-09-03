@@ -10,10 +10,15 @@ import models
 from models.base_model import BaseModel, Base
 from models.employees import Employee
 from models.admin import Admin
+from models.settings import Settings
+import logging
+
+logger = logging.getLogger(__name__)
+logging = logging.getLogger(__name__)
 
 load_dotenv() # to take the variables from .env
 
-classes = {"Employee": Employee}
+classes = {"Employee": Employee, "Admin": Admin, "Settings": Settings}
 
 class DBStorage:
     """Class to interact with the MySQL database"""
@@ -40,13 +45,18 @@ class DBStorage:
     def all(self, cls=None):
         """query on the current database session"""
         new_dict = {}
+        logger.info(f"Classes: {classes}")
         for clss in classes:
             if cls is None or cls is classes[clss] or cls is clss:
-                objs = self.__session.query(classes[clss]).all()
-                for obj in objs:
-                    key = obj.__class__.__name__ + '.' + obj.id
-                    #print(f"Retrieved object: {obj}")  # Debug print
+                try:
+                    objs = self.__session.query(classes[clss]).all()
+                    for obj in objs:
+                        key = obj.__class__.__name__ + '.' + obj.id
+                        print(f"Retrieved object: {obj}")  # Debug print
                     new_dict[key] = obj
+                except Exception as e:
+                    print(f"Error retrieving data: {e}")
+                    return None
         return (new_dict)
 
     def new(self, obj):
@@ -96,6 +106,26 @@ class DBStorage:
     def get_meta(self):
         """Returns the metadata"""
         return Base.metadata
+    
+    def filter_by(self, cls, **kwargs):
+        """Returns the objects based on the class name and the key/value pair passed as argument"""
+        if cls not in classes.values():
+            return []
+        results = []
+        all_cls = models.storage.all(cls)
+        for obj in all_cls.values():
+            logger.info(f"Object: {obj.__dict__}")
+            match = True
+            for key, value in kwargs.items():
+                if key in obj.__dict__ and value != obj.__dict__[key]:
+                    logger.info(f"Key {key} mismatch: {obj.__dict__[key]} != {value}")
+                    match = False
+                    break
+            if match:
+                results.append(obj)
+        logger.info(f"Filtered objects: {[obj.email for obj in results]}")
+        return results
+    
 
     def count(self, cls=None):
         """Returns the number of objects in storage"""

@@ -6,7 +6,5 @@ from routes.employees.employee_routs import employee_bp
 from routes.auth.auth_routes import auth_bp
 
 def register_routes(app):
-    """Register all routes"""
-    #app.register_blueprint(admin_bp)
-    app.register_blueprint(employee_bp)
+    """Register Auth routes"""
     app.register_blueprint(auth_bp)
