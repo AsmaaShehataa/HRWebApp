@@ -14,6 +14,7 @@ from config import Config
 from functools import wraps
 from extensions import db
 from werkzeug.utils import secure_filename
+from app import app
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -88,8 +89,8 @@ def add_employee(current_user):
         if file != '':
             filename = secure_filename(file.filename)
             if filename.split('.')[-1].lower() in ALLOWED_EXTENSIONS:
-                file.save(os.path.join(UPLOAD_FOLDER, filename))
-                photo_url = os.path.join(UPLOAD_FOLDER, filename)
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                photo_url = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             else:
                 return jsonify({'error': 'Invalid file type'}), 400
     data = {
