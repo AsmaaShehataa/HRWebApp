@@ -10,18 +10,20 @@ import models
 from flask_sqlalchemy import SQLAlchemy
 import hashlib
 from datetime import datetime
+from extensions import db
+from werkzeug.security import generate_password_hash, check_password_hash
 
-db = SQLAlchemy()
+
 
 class Admin(BaseModel, Base):
     """Admin class"""
     __tablename__ = 'admins'
-    name = Column(String(128), nullable=True)
-    email = Column(String(128), nullable=False)
-    password = Column(String(256), nullable=False)
-    role = Column(Integer, default=1, nullable=False)
-    deleted_at = Column(DateTime, nullable=True, default=None) # Soft Delete
-    employees = relationship('Employee', back_populates='admin')
+    name = db.Column(db.String(128), nullable=True)
+    email = db.Column(db.String(128), nullable=False)
+    password = db.Column(db.String(256), nullable=False)
+    role = db.Column(db.Integer, default=1, nullable=False)
+    deleted_at = db.Column(db.DateTime, nullable=True, default=None)
+    employees = db.relationship('Employee', back_populates='admin')
 
     def __init__(self, *args, **kwargs):
         """Initialize the Admin instance"""
@@ -39,8 +41,7 @@ class Admin(BaseModel, Base):
 
     def verify_password(self, entered_password):
         """Verify the password"""
-        entered_md5_hash= hashlib.md5(entered_password.encode()).hexdigest()
-        return entered_md5_hash == self.password
+        return check_password_hash(self.password, entered_password)
 
     def soft_del(self):
         """Soft delete the user"""

@@ -45,19 +45,14 @@ class DBStorage:
     def all(self, cls=None):
         """query on the current database session"""
         new_dict = {}
-        logger.info(f"Classes: {classes}")
         for clss in classes:
             if cls is None or cls is classes[clss] or cls is clss:
-                try:
-                    objs = self.__session.query(classes[clss]).all()
-                    for obj in objs:
-                        key = obj.__class__.__name__ + '.' + obj.id
-                        print(f"Retrieved object: {obj}")  # Debug print
+                objs = self.__session.query(classes[clss]).all()
+                for obj in objs:
+                    key = obj.__class__.__name__ + '.' + obj.id
                     new_dict[key] = obj
-                except Exception as e:
-                    print(f"Error retrieving data: {e}")
-                    return None
         return (new_dict)
+    
 
     def new(self, obj):
         """add the object to the current database session"""
@@ -107,10 +102,12 @@ class DBStorage:
         """Returns the metadata"""
         return Base.metadata
     
-    def filter_by(self, cls, **kwargs):
-        """Returns the objects based on the class name and the key/value pair passed as argument"""
+    def filter_by(self, cls, first_param=False, **kwargs):
+        """Returns the objects based on the class name and the key/value pair passed as argument.
+            If first_param=True, return the first matching object"""
         if cls not in classes.values():
-            return []
+            return None if first_param else []
+    
         results = []
         all_cls = models.storage.all(cls)
         for obj in all_cls.values():
@@ -118,12 +115,14 @@ class DBStorage:
             match = True
             for key, value in kwargs.items():
                 if key in obj.__dict__ and value != obj.__dict__[key]:
-                    logger.info(f"Key {key} mismatch: {obj.__dict__[key]} != {value}")
+                    #logger.info(f"Key {key} mismatch: {obj.__dict__[key]} != {value}")
                     match = False
                     break
             if match:
                 results.append(obj)
-        logger.info(f"Filtered objects: {[obj.email for obj in results]}")
+                if first_param:
+                    return obj
+        #logger.info(f"Filtered objects: {[obj.email for obj in results]}")
         return results
     
 

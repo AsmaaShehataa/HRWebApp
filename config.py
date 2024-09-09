@@ -16,3 +16,6 @@ class Config:
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     WTF_CSRF_ENABLED = False
+    UPLOAD_FOLDER = 'web_flask/static/uploads'
+    ALLOWED_EXTENSIONS = {'png', 'jpg'}
+    

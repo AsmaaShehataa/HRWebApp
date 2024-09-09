@@ -16,6 +16,7 @@ from models.employees import Employee
 from models.admin import Admin
 #from models.auth import User, Role
 from routes.auth.auth_routes import auth_bp
+from extensions import db
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -30,13 +31,17 @@ sentry_sdk.init(
 # Load environment variables
 load_dotenv()
 
-# print(os.getenv('HR_MYSQL_USER'))
-# print(os.getenv('HR_MYSQL_PWD'))
-# print(os.getenv('HR_MYSQL_HOST'))
-# print(os.getenv('HR_MYSQL_DB'))
 
 app = Flask(__name__)
 app.config.from_object(Config)
+
+# set the upload folder path
+app.config.from_object(Config)
+app.config['UPLOAD_FOLDER'] = Config.UPLOAD_FOLDER
+
+
+# Initialize Flask SQLAlchemy
+db.init_app(app)
 
 # Register routes
 register_routes(app)
@@ -47,7 +52,8 @@ seeder = FlaskSeeder()
 seeder.init_app(app, storage._DBStorage__session)
 
 # Initialize Flask Migrate
-migrate = Migrate(app, storage.get_engine())
+#migrate = Migrate(app, storage.get_engine())
+migrate = Migrate(app, db)
 
 @app.teardown_appcontext
 def close_db(error):
