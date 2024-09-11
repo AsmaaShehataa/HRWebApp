@@ -16,7 +16,7 @@ from models.employees import Employee
 from models.admin import Admin
 #from models.auth import User, Role
 from routes.auth.auth_routes import auth_bp
-from extensions import db
+from extensions import db, mail
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -34,6 +34,7 @@ load_dotenv()
 
 app = Flask(__name__)
 app.config.from_object(Config)
+mail.init_app(app)
 
 # set the upload folder path
 app.config.from_object(Config)

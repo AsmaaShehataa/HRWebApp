@@ -14,7 +14,9 @@ from config import Config
 from functools import wraps
 from extensions import db
 from werkzeug.utils import secure_filename
-from app import app
+#from app import app
+from models.notifications.notification_factory import NotificationFactory
+
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -89,14 +91,15 @@ def add_employee(current_user):
         if file != '':
             filename = secure_filename(file.filename)
             if filename.split('.')[-1].lower() in ALLOWED_EXTENSIONS:
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                photo_url = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                file.save(os.path.join(UPLOAD_FOLDER, filename))
+                photo_url = os.path.join(UPLOAD_FOLDER, filename)
             else:
                 return jsonify({'error': 'Invalid file type'}), 400
+    plain_password = form.password.data
     data = {
         'name': form.name.data,
         'email': form.email.data,
-        'password': form.password.data,
+        'password': plain_password,
         'phone': form.phone.data,
         'department': form.department.data,
         'start_date': form.start_date.data,
@@ -119,14 +122,48 @@ def add_employee(current_user):
         #if emp.email == form.email.data:
             flash('Employee already exists', 'danger')
             return jsonify({"error": "Employee already exists"}), 400
+    try:
+        new_employee = Employee(**data)
+        #new_employee.password = generate_password_hash(data['password']) #--> set the password and return the hashed
+        #new_employee.set_password(data['password']) --> ignore this bec settattr is already implemented in the model and will generate the password hash
+        new_employee.save()
 
-    new_employee = Employee(**data)
-    #new_employee.password = generate_password_hash(data['password']) #--> set the password and return the hashed
-    #new_employee.set_password(data['password']) --> ignore this bec settattr is already implemented in the model and will generate the password hash
-    new_employee.save()
-    logger.info('Employee added successfully')
+        # Notification Content
+
+        emp_welcome_message = (f"Welcome {new_employee.name}!\n"
+                               f"Your Credentials are Email: {new_employee.email},\n" 
+                               f"Password: {plain_password},\n"
+                                 f"Department: {new_employee.department},\n\n"
+                                    "Please keep your credentials safe and do not share them with anyone.\n\n"
+                               )
+        admin_message = f"New Employee {new_employee.name} has been added successfully with email {new_employee.email} and password {new_employee.password}" 
+
+        # Send Email Notification to employee
+        email_notification = NotificationFactory.create_notification("email")
+        email_notification.send(new_employee.email, emp_welcome_message)
+
+        # Send Email Notification to Admin
+        email_notification.send(current_user.email, admin_message)
+
+        db.session.commit() # commit the transaction only if the email is sent successfully
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error adding employee No email was sent: {str(e)}")
+        return jsonify({"error": "Error adding employee"}), 500
+    
+    logger.info(f"New Employee: {new_employee}")
     flash('Employee added successfully', 'success')
     return jsonify(new_employee.to_dict()), 201
+
+
+    # Send SMS Notification to Admin
+    # sms_notification = NotificationFactory.create_notification("sms")
+    # sms_notification.send(current_user.phone, admin_message)
+
+    # # send SMS Notification to employee
+    # sms_notification.send(new_employee.phone, emp_welcome_message)
+
+
 
 @employee_bp.route('/<employee_id>', methods=['GET'])
 @token_required
