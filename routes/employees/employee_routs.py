@@ -16,6 +16,8 @@ from extensions import db
 from werkzeug.utils import secure_filename
 #from app import app
 from models.notifications.notification_factory import NotificationFactory
+from models.attendance import Attendance
+from datetime import datetime
 
 
 logging.basicConfig(level=logging.INFO)
@@ -27,6 +29,7 @@ employee_bp = Blueprint('employee_bp', __name__, url_prefix='/employees')
 ALLOWED_EXTENSIONS = {'png', 'jpg'}
 UPLOAD_FOLDER = 'web_flask/static/uploads'
 
+# admin token required
 def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
@@ -41,6 +44,28 @@ def token_required(f):
             logger.info(f"Decoded email from token: {data['email']}")
             current_user = storage.filter_by(Admin, email=data['email'], first_param=True)
 
+            if not current_user:
+                return jsonify({'error': 'User not found'}), 403
+        except Exception as e:
+            logger.error('Token is invalid')
+            return jsonify({'error': 'Token is invalid'}), 403
+        return f(current_user, *args, **kwargs)
+    return decorated
+
+# employee token required
+def employee_token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth_header = request.headers.get('Authorization')
+        if not auth_header:
+            return jsonify({'error': 'Token is missing'}), 403
+        
+        try:
+            token = auth_header.split(" ")[1]
+            data = jwt.decode(token, Config.SECRET_KEY, algorithms=['HS256'])
+            logger.info(f"Decoded email from token: {data['email']}")
+            current_user = Employee.query.filter_by(email=data['email']).first()
+            
             if not current_user:
                 return jsonify({'error': 'User not found'}), 403
         except Exception as e:
@@ -183,45 +208,92 @@ def get_employee(current_user, employee_id):
 
 @employee_bp.route('/<employee_id>', methods=['PUT'])
 @token_required
-def update_employee(current_user, employee_id):
-    """Update an employee"""
-    if current_user.role != 1:
-        return jsonify({'message': 'Your are Not authorized to perform this action'}), 403
 
-    #employee = storage.get(Employee, employee_id)
-    # query from the database
-    employee = Employee.query.get(employee_id)
-    print(employee)
-    if not employee:
-        return jsonify({'error': 'Employee not found'}), 404
+# def update_employee(current_user, employee_id):
+#     """Update an employee"""
+#     if current_user.role != 1:
+#         return jsonify({'message': 'Your are Not authorized to perform this action'}), 403
+
+#     #employee = storage.get(Employee, employee_id)
+#     # query from the database
+#     employee = Employee.query.get(employee_id)
+#     print(employee)
+#     if not employee:
+#         return jsonify({'error': 'Employee not found'}), 404
     
-    data = request.json
+#     data = request.json
 
 
-    original_data = {
-        'name': employee.name,
-        'email': employee.email,
-        'phone': employee.phone,
-        'department': employee.department,
-        'start_date': employee.start_date,
-        'salary': employee.salary
-    }
+#     original_data = {
+#         'name': employee.name,
+#         'email': employee.email,
+#         'phone': employee.phone,
+#         'department': employee.department,
+#         'start_date': employee.start_date,
+#         'salary': employee.salary
+#     }
 
-    # Store updated attributes
-    updated_fields = {}
+#     # Store updated attributes
+#     updated_fields = {}
 
-    # Update the employee's information and track changed fields
-    for key, value in data.items():
-        if hasattr(employee, key) and getattr(employee, key) != value:
-            setattr(employee, key, value)
-            updated_fields[key] = {
-                'old': original_data.get(key),
-                'new': value
-            }
+#     # Update the employee's information and track changed fields
+#     for key, value in data.items():
+#         if hasattr(employee, key) and getattr(employee, key) != value:
+#             setattr(employee, key, value)
+#             updated_fields[key] = {
+#                 'old': original_data.get(key),
+#                 'new': value
+#             }
 
-    # Save the updated employee
-    #storage.save()
+#     # Save the updated employee
+#     #storage.save()
+#     db.session.commit()
+
+#     logger.info('Employee updated successfully')
+#     flash('Employee updated successfully', 'success')
+#     return jsonify({'message': 'Employee updated successfully', 'employee': employee.to_dict()}), 200
+
+@employee_bp.route('/check-in', methods=['POST'], endpoint='employee_check_in')
+@employee_token_required
+def check_in(current_user):
+    """Employee check-in"""
+    # Ensure the role is 'Employee' (role = 0 for employees)
+    if current_user.role != 0:
+        return jsonify({'message': 'You are not authorized to perform this action'}), 403
+    
+    # Check if the user has already checked in and not checked out
+    existing_check_in = Attendance.query.filter_by(employee_id=current_user.id, check_out=None).first()
+    
+    current_time = datetime.now()
+    if current_time.hour != 10 or current_time.minute != 0:
+        return jsonify({'error': 'You can only check in between 10:00 and 10:15'}), 403
+    
+    if existing_check_in:
+        return jsonify({'error': 'You have already checked in'}), 400
+    
+    # Record the check-in time
+    check_in_record = Attendance(employee_id=current_user.id, check_in_time=datetime.now())
+    db.session.add(check_in_record)
     db.session.commit()
-    flash('Employee updated successfully', 'success')
-    logger.info('Employee updated successfully')
-    return jsonify({'message': 'Employee updated successfully', 'employee': employee.to_dict()}), 200
+    
+    return jsonify({'message': 'You have successfully checked in', 'attendance': check_in_record.custom_dict()}), 201
+
+@employee_bp.route('/check-out', methods=['POST'], endpoint='employee_check_out')
+@employee_token_required
+def check_out(current_user):
+    """Employee check-out"""
+    # Ensure the role is 'Employee' (role = 0 for employees)
+    if current_user.role != 0:
+        return jsonify({'message': 'You are not authorized to perform this action'}), 403
+    
+    # Check if the user has already checked in and not checked out
+    existing_check_in = Attendance.query.filter_by(employee_id=current_user.id, check_out=None).first()
+    
+    if not existing_check_in:
+        return jsonify({'error': 'You have not checked in'}), 400
+    
+    # Record the check-out time
+    existing_check_in.check_out = datetime.now()
+    db.session.commit()
+    
+    return jsonify({'message': 'You have successfully checked out', 'attendance': existing_check_in.custom_dict()}), 201

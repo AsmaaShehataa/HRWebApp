@@ -16,11 +16,15 @@ import jwt
 from config import Config
 from functools import wraps
 from os import getenv
+from extensions import db
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 auth_bp = Blueprint('auth_bp', __name__, url_prefix='/check')
+
+
+
 
 def token_required(f):
     @wraps(f)
@@ -44,6 +48,7 @@ def token_required(f):
         return f(current_admin, *args, **kwargs)
     return decorated
 
+
 @auth_bp.route('/login', methods=['POST'])
 def login():
     """Login user"""
@@ -54,7 +59,6 @@ def login():
     data = {
         'email': form.email.data,
         'password': form.password.data,
-        
     }
 
     # Required fields for user creation
@@ -64,13 +68,14 @@ def login():
             abort(400, f'Missing {field}')
         
     # Check if the user exists
-    existing_emp = storage.filter_by(Employee, email=data['email'])
+    existing_emp = Employee.query.filter_by(email=form.email.data).first()
+    
     if existing_emp:
         logger.info(f'Found user: {existing_emp.email}')
+        logger.info(f'Checking password: stored: {existing_emp.password}, entered: {form.password.data}')
 
-        logger.info('Checking password', existing_emp.password, form.password.data)
-        if check_password_hash(existing_emp.password, form.password.data):
         
+        if check_password_hash(existing_emp.password, form.password.data):
             token = jwt.encode({'email': existing_emp.email, 'exp': datetime.utcnow() + timedelta(minutes=30)}, Config.SECRET_KEY)
             flash('Login successful')
             return jsonify({'token': token})
@@ -78,16 +83,17 @@ def login():
             logger.warning('Password mismatch')
             return jsonify({'error': 'Invalid username or password'}), 400
 
-    logger.warning('User not found, creating new user')
+    logger.warning('User not found')
     # Create a new user
     new_emp = Employee(**data)
     new_emp.password = generate_password_hash(data['password'])
-    new_emp.save()
+    new_emp.add(new_emp)
+    db.session.commit()
+
     token = jwt.encode({'email': new_emp.email, 'exp': datetime.utcnow() + timedelta(minutes=30)}, Config.SECRET_KEY)
     logger.info('User created successfully')
-    flash('User created successfully')
-    
     return jsonify({'token': token})
+
 
 # @auth_bp.route('/adminlogin', methods=['POST'])
 # def admin_login():
@@ -180,7 +186,8 @@ def admin_login():
         logger.info(f'Found user: {existing_admin.email}')
 
 
-        logger.info('Checking password', existing_admin.password, form.password.data)
+        #logger.info('Checking password', existing_admin.password, form.password.data)
+        logger.info(f'Checking password: stored: {existing_admin.password}, entered: {form.password.data}')
         logger.info(generate_password_hash(data['password']))
 
         if check_password_hash(existing_admin.password, form.password.data):

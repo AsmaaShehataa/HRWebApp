@@ -17,6 +17,7 @@ from models.admin import Admin
 #from models.auth import User, Role
 from routes.auth.auth_routes import auth_bp
 from extensions import db, mail
+from models.attendance import Attendance
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

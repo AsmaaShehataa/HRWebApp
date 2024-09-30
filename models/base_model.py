@@ -71,10 +71,25 @@ class BaseModel(db.Model):
         for attr in ["name", "email", "phone", "department", "start_date", "salary", "role", "photo", "admin_id"]:
             if hasattr(self, attr):
                 new_dict[attr] = getattr(self, attr)
+        for column in self.__table__.columns:
+            column_name = column.name
+            if isinstance(getattr(self, column_name), datetime):
+                new_dict[column_name] = getattr(self, column_name).strftime("%Y-%m-%d %H:%M:%S")
+            else:
+                new_dict[column_name] = getattr(self, column)
         # if getenv("save_fs") is None:
         #     if "password" in new_dict:
         #         del new_dict["password"] --> this is for the old version will remove the password field from the emp class
         return new_dict
+    
+    def custom_dict(self):
+        """Return a custom dictionary with selected fields"""
+        return {
+            "check_in": self.check_in.strftime("%Y-%m-%d %H:%M:%S") if self.check_in else None,
+            "check_out": self.check_out.strftime("%Y-%m-%d %H:%M:%S") if self.check_out else None,
+            "employee_id": self.employee_id
+    }
+
 
     def delete(self):
         """Delete the current instance from the storage"""

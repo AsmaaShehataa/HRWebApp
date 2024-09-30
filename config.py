@@ -14,10 +14,6 @@ class Config:
         os.getenv('HR_MYSQL_HOST'),
         os.getenv('HR_MYSQL_DB')
     )
-    print("HR_MYSQL_USER:", os.getenv('HR_MYSQL_USER'))
-    print("HR_MYSQL_PWD:", os.getenv('HR_MYSQL_PWD'))
-    print("HR_MYSQL_DB:", os.getenv('HR_MYSQL_DB'))
-    print("Database URI:", SQLALCHEMY_DATABASE_URI)
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     WTF_CSRF_ENABLED = False
