@@ -17,11 +17,11 @@ logger = logging.getLogger(__name__)
 class EmailNotification(Notification):
     """Email Notification Class"""
 
-    def send(self, recipient, message):
+    def send(self, recipient, subject, message):
         """Send an email notification to a recipient"""
         sender_email = Settings.get_value('email_sender') or Config.MAIL_DEFAULT_SENDER
-        logger.info(f'Sending email to {recipient}: {message}')
-        msg = Message(subject="New Employee Added", 
+        logger.info(f"Sending email to {recipient} with subject '{subject}': {message}")
+        msg = Message(subject=subject,
                       sender=sender_email,
                         recipients=[recipient])
         msg.body = message
