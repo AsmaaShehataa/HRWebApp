@@ -50,3 +50,32 @@ CREATE TABLE `settings` (
   PRIMARY KEY (`key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- Table structure for `leave_requests`
+DROP TABLE IF EXISTS `leave_requests`;
+CREATE TABLE `leave_requests` (
+  `leave_id` VARCHAR(60) NOT NULL,
+  `employee_id` VARCHAR(60) NOT NULL,
+  `from_date` DATETIME NOT NULL,
+  `to_date` DATETIME NOT NULL,
+  `reason` TEXT NOT NULL,
+  `status` TINYINT DEFAULT 0 COMMENT '0 -> Pending, 1 -> Approved, 2 -> Rejected',
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`leave_id`),
+  FOREIGN KEY (`employee_id`) REFERENCES `employees`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- table structure for `attendance`
+DROP TABLE IF EXISTS `attendance`;
+CREATE TABLE `attendance` (
+  `attendance_id` VARCHAR(60) NOT NULL,
+  `employee_id` VARCHAR(60) NOT NULL,
+  `date` DATE NOT NULL,
+  `status` TINYINT DEFAULT 0 COMMENT '0 -> Absent, 1 -> Present',
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`attendance_id`),
+  FOREIGN KEY (`employee_id`) REFERENCES `employees`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+

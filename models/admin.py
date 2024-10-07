@@ -23,7 +23,6 @@ class Admin(BaseModel, Base):
     password = db.Column(db.String(256), nullable=False)
     role = db.Column(db.Integer, default=1, nullable=False)
     deleted_at = db.Column(db.DateTime, nullable=True, default=None)
-    dummy_field = db.Column(db.String(60), nullable=True)
     employees = db.relationship('Employee', back_populates='admin')
     
 

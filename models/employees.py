@@ -4,16 +4,12 @@
 import models
 from models.base_model import BaseModel, Base
 from os import getenv
-import sqlalchemy
 from sqlalchemy.orm import relationship
 from sqlalchemy import Column, String, Integer, DateTime, BLOB, ForeignKey
 import hashlib
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_sqlalchemy import SQLAlchemy
-#from app import db import db inside the class to avoid circular import
-from config import Config
-from extensions import db # import db from extentions.py to avoid circular import - standalone file
+from extensions import db
 
 
 class Employee(BaseModel, Base):
@@ -30,11 +26,19 @@ class Employee(BaseModel, Base):
     role = db.Column(db.Integer, default=0, nullable=False)
     photo = db.Column(db.String(250), nullable=True)
     deleted_at = db.Column(db.DateTime, nullable=True, default=None) # Soft Delete
-    admin_id = db.Column(db.String(60), db.ForeignKey('admins.id'), nullable=True)
-    dummy_field = db.Column(db.String(50), nullable=True)  # Add this temporary field
-
-
     admin = db.relationship('Admin', back_populates='employees')
+    admin_id = db.Column(db.String(60), db.ForeignKey('admins.id'), nullable=True)
+
+
+    #Relationships with the new added model of leave request
+
+    head_employee_id = db.Column(db.String(60), db.ForeignKey('employees.id'), nullable=True)
+    #Self-Refrence relationship for manager(head_employee)
+    head_employee = relationship('Employee', remote_side='Employee.id', back_populates='employees_managed')
+    #leave_request = db.relationship('LeaveRequest', backref='employee', lazy=True)
+    employees_managed = db.relationship('Employee', back_populates='head_employee', lazy=True)
+
+
     # its 1:1 relationship but but one way direction (admin -> employee)
     # admin can access employee but employee atts can't access admin
     #admin = relationship('Admin', back_populates='employees')
