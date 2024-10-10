@@ -76,7 +76,7 @@ class BaseModel(db.Model):
             if isinstance(getattr(self, column_name), datetime):
                 new_dict[column_name] = getattr(self, column_name).strftime("%Y-%m-%d %H:%M:%S")
             else:
-                new_dict[column_name] = getattr(self, column)
+                new_dict[column_name] = getattr(self, column_name)
         # if getenv("save_fs") is None:
         #     if "password" in new_dict:
         #         del new_dict["password"] --> this is for the old version will remove the password field from the emp class

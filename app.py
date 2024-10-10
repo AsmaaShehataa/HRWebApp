@@ -18,6 +18,7 @@ from models.admin import Admin
 from routes.auth.auth_routes import auth_bp
 from extensions import db, mail
 from models.attendance import Attendance
+from routes.employees.leaves import leaves_blueprint
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -39,15 +40,19 @@ mail.init_app(app)
 
 # set the upload folder path
 app.config.from_object(Config)
+# set the upload folder path
+app.config.from_object(Config)
 app.config['UPLOAD_FOLDER'] = Config.UPLOAD_FOLDER
 
-
+# Register blueprint
 # Initialize Flask SQLAlchemy
 db.init_app(app)
 
 # Register routes
 register_routes(app)
 
+
+print(app.url_map)
 
 # Initialize Flask Seeder 
 seeder = FlaskSeeder()

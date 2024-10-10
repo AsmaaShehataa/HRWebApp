@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 """Leave Request Model"""
 
-from sqlalchemy import Column, String, ForeignKey, Boolean, DateTime, Integer
+from sqlalchemy import Column, String, Boolean, DateTime, Integer, ForeignKey
 from sqlalchemy.orm import DeclarativeBase, relationship
 from models.base_model import BaseModel, Base
 from extensions import db
@@ -13,6 +13,7 @@ class LeaveRequest(BaseModel, Base):
     __tablename__ = 'leave_requests'
 
     employee_id = db.Column(db.String(60), db.ForeignKey('employees.id'), nullable=False)
+    email = db.Column(db.String(128), nullable=False)
     start_date = db.Column(db.DateTime, nullable=False)
     end_date = db.Column(db.DateTime, nullable=False)
     leave_type = db.Column(db.String(60), nullable=False)
@@ -23,8 +24,8 @@ class LeaveRequest(BaseModel, Base):
     deleted_at = db.Column(db.DateTime, nullable=True, default=None)
     
     # Relationships
-    employee = db.relationship('Employee', ForeignKeys=[employee_id], backref='leave_requests')
-    manager = db.relationship('Employee', ForeignKeys=[approved_by], backref='approved_leaves')
+    employee = db.relationship('Employee', foreign_keys=[employee_id], backref='leave_requests')
+    manager = db.relationship('Employee', foreign_keys=[approved_by], backref='approved_leaves')
     #admin = db.relationship('Admin', back_populates='leave_requests')
 
     def __init__(self, *args, **kwargs):

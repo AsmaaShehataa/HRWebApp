@@ -129,7 +129,8 @@ def add_employee(current_user):
         'department': form.department.data,
         'start_date': form.start_date.data,
         'salary': form.salary.data,
-        'photo': photo_url if photo_url else None
+        'photo': photo_url if photo_url else None,
+        'head_employee_email': form.head_employee_email.data
     }
     logger.info(f"Photo URL: {photo_url}")
 
@@ -161,14 +162,15 @@ def add_employee(current_user):
                                  f"Department: {new_employee.department},\n\n"
                                     "Please keep your credentials safe and do not share them with anyone.\n\n"
                                )
-        admin_message = f"New Employee {new_employee.name} has been added successfully with email {new_employee.email} and password {new_employee.password}" 
+        admin_message = f"New Employee {new_employee.name} has been added successfully with email {new_employee.email} and password {new_employee.password}"
 
         # Send Email Notification to employee
         email_notification = NotificationFactory.create_notification("email")
-        email_notification.send(new_employee.email, emp_welcome_message)
+        #email_notification.send(new_employee.email, emp_welcome_message)
+        email_notification.send(new_employee.email, "New Employee Added", emp_welcome_message)
 
         # Send Email Notification to Admin
-        email_notification.send(current_user.email, admin_message)
+        email_notification.send(current_user.email, "New Employee Added", admin_message)
 
         db.session.commit() # commit the transaction only if the email is sent successfully
     except Exception as e:

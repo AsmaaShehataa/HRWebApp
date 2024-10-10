@@ -24,7 +24,7 @@ CREATE TABLE `employees` (
   `department` VARCHAR(128) NOT NULL,
   `start_date` DATETIME NOT NULL,
   `salary` VARCHAR(128) NOT NULL,
-  `role` TINYINT DEFAULT 0 COMMENT '0 -> Employee, 1 -> Admin',
+  `role` TINYINT DEFAULT 0 COMMENT '0 -> Employee, 1 -> Admin, 3 -> Manager'
   `photo` VARCHAR(250),
   `deleted_at` DATETIME DEFAULT NULL,
   PRIMARY KEY (`id`)
@@ -38,6 +38,7 @@ CREATE TABLE `admins` (
   `email` VARCHAR(128) NOT NULL UNIQUE,
   `password` VARCHAR(128) NOT NULL,
   `role` TINYINT DEFAULT 1 NOT NULL,
+  `deleted_at` DATETIME DEFAULT NULL,
   PRIMARY KEY (`admin_id`),
   FOREIGN KEY (`admin_id`) REFERENCES `employees`(`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -55,6 +56,7 @@ DROP TABLE IF EXISTS `leave_requests`;
 CREATE TABLE `leave_requests` (
   `leave_id` VARCHAR(60) NOT NULL,
   `employee_id` VARCHAR(60) NOT NULL,
+  `email` VARCHAR(128) NOT NULL UNIQUE,
   `from_date` DATETIME NOT NULL,
   `to_date` DATETIME NOT NULL,
   `reason` TEXT NOT NULL,

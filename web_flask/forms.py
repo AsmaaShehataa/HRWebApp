@@ -18,6 +18,7 @@ class EmployeeForm(FlaskForm):
     #role = StringField('Role', validators=[DataRequired()])
     photo = FileField('Photo', validators=[FileAllowed(['jpg', 'png'], 'Images only!')])
     #admin_id = StringField('Admin ID', validators=[DataRequired()])
+    head_employee_email = StringField('Head Employee Email', validators=[Email(), DataRequired()])
 
 
 class LoginForm(FlaskForm):
@@ -46,4 +47,14 @@ class EmployeeUpdateForm(FlaskForm):
     department = StringField('Department', validators=[DataRequired()])
     start_date = DateField('Start Date', format='%Y-%m-%d', validators=[DataRequired()])
     salary = IntegerField('Salary', validators=[DataRequired(), NumberRange(min=1, message='Salary must be a positive number')])
+    
+
+class LeaveRequestForm(FlaskForm):
+    """Leave Request Form"""
+    email = StringField('Email', validators=[DataRequired(), Email(), Regexp(r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$', message='Invalid email')])
+    start_date = DateField('Start Date', format='%Y-%m-%d', validators=[DataRequired()])
+    end_date = DateField('End Date', format='%Y-%m-%d', validators=[DataRequired()])
+    leave_type = StringField('Leave Type', validators=[DataRequired()])
+    reason = StringField('Reason', validators=[DataRequired(), Length(max=1000)])
+    leave_days = StringField('Leave Days', validators=[DataRequired()])
     
