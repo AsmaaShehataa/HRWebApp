@@ -41,6 +41,7 @@ def token_required(f):
             token = auth_header.split(" ")[1]
             data = jwt.decode(token, Config.SECRET_KEY, algorithms=['HS256'])
             #admin = storage.filter_by(Admin, email=data['email'])
+            logger.info("Employee route 1")
             logger.info(f"Decoded email from token: {data['email']}")
             current_user = storage.filter_by(Admin, email=data['email'], first_param=True)
 
@@ -63,6 +64,7 @@ def employee_token_required(f):
         try:
             token = auth_header.split(" ")[1]
             data = jwt.decode(token, Config.SECRET_KEY, algorithms=['HS256'])
+            logger.info("Employee route 2")
             logger.info(f"Decoded email from token: {data['email']}")
             current_user = Employee.query.filter_by(email=data['email']).first()
             
@@ -130,7 +132,7 @@ def add_employee(current_user):
         'start_date': form.start_date.data,
         'salary': form.salary.data,
         'photo': photo_url if photo_url else None,
-        'head_employee_email': form.head_employee_email.data
+        'head_employee_id': form.head_employee_id.data
     }
     logger.info(f"Photo URL: {photo_url}")
 

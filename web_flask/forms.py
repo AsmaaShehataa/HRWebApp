@@ -18,7 +18,8 @@ class EmployeeForm(FlaskForm):
     #role = StringField('Role', validators=[DataRequired()])
     photo = FileField('Photo', validators=[FileAllowed(['jpg', 'png'], 'Images only!')])
     #admin_id = StringField('Admin ID', validators=[DataRequired()])
-    head_employee_email = StringField('Head Employee Email', validators=[Email(), DataRequired()])
+    #head_employee_email = StringField('Head Employee Email', validators=[Email(), DataRequired()])
+    head_employee_id = StringField('Head Employee ID', validators=[DataRequired()])
 
 
 class LoginForm(FlaskForm):

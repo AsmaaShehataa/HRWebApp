@@ -24,7 +24,7 @@ CREATE TABLE `employees` (
   `department` VARCHAR(128) NOT NULL,
   `start_date` DATETIME NOT NULL,
   `salary` VARCHAR(128) NOT NULL,
-  `role` TINYINT DEFAULT 0 COMMENT '0 -> Employee, 1 -> Admin, 3 -> Manager'
+  `role` TINYINT DEFAULT 0 COMMENT '0 -> Employee, 1 -> Admin, 3 -> Manager',
   `photo` VARCHAR(250),
   `deleted_at` DATETIME DEFAULT NULL,
   PRIMARY KEY (`id`)

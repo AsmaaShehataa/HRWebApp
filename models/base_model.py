@@ -68,6 +68,7 @@ class BaseModel(db.Model):
         if hasattr(self, "_plain_password"):
             new_dict["password"] = self.password # other wise to retuen the password as plain text we should replace with self._plain_password
 
+
         for attr in ["name", "email", "phone", "department", "start_date", "salary", "role", "photo", "admin_id"]:
             if hasattr(self, attr):
                 new_dict[attr] = getattr(self, attr)

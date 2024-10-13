@@ -38,6 +38,7 @@ def token_required(f):
             data = jwt.decode(token, Config.SECRET_KEY, algorithms=['HS256'])
             admin = storage.filter_by(Admin, email=data['email'])
             print(admin)
+            logger.info("Auth routes")
             logger.info(f"Decoded email from token: {data['email']}")
             current_admin = storage.filter_by(Admin, email=data['email'])
             if not current_admin:
@@ -78,6 +79,7 @@ def login():
         if check_password_hash(existing_emp.password, form.password.data):
             token = jwt.encode({'email': existing_emp.email, 'exp': datetime.utcnow() + timedelta(minutes=30)}, Config.SECRET_KEY)
             flash('Login successful')
+            logger.info(f'user: {existing_emp}')
             return jsonify({'token': token})
         else:
             logger.warning('Password mismatch')
@@ -90,7 +92,7 @@ def login():
     new_emp.add(new_emp)
     db.session.commit()
 
-    token = jwt.encode({'email': new_emp.email, 'exp': datetime.utcnow() + timedelta(minutes=30)}, Config.SECRET_KEY)
+    token = jwt.encode({'email': new_emp.email,'id': new_emp.id, 'exp': datetime.utcnow() + timedelta(minutes=30)}, Config.SECRET_KEY)
     logger.info('User created successfully')
     return jsonify({'token': token})
 

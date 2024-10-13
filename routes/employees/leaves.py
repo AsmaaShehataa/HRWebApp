@@ -28,6 +28,7 @@ def employee_token_required(f):
         try:
             token = auth_header.split(" ")[1]
             data = jwt.decode(token, Config.SECRET_KEY, algorithms=['HS256'])
+            logger.info("Leaves route")
             logger.info(f"Decoded email from token: {data['email']}")
             current_user = Employee.query.filter_by(email=data['email']).first()
             

@@ -31,8 +31,7 @@ class LeaveRequest(BaseModel, Base):
     def __init__(self, *args, **kwargs):
         """Initialize the Leave Request instance"""
         super().__init__(*args, **kwargs)
-        # if kwargs:
-        #     for key, value in kwargs.items():
-        #         if key != "__class__":
-        #             setattr(self, key, value)
-  
+        if kwargs:
+            for key, value in kwargs.items():
+                if key != "__class__":
+                    setattr(self, key, value)
