@@ -20,5 +20,6 @@ class NotificationFactory:
         elif notification_type == "sms":
             return SMSNotification()
         else:
+            logger.error(f"Invalid notification type: {notification_type}")
             raise ValueError(f'Invalid notification type: {notification_type}')
 

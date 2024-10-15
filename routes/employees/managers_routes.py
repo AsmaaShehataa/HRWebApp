@@ -11,6 +11,7 @@ from extensions import db
 from config import Config
 import jwt
 import logging
+from models.notifications.notification_factory import NotificationFactory
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -97,6 +98,24 @@ def approve_leave(current_user, leave_id):
   leave_request.approved_by = current_user.id
   db.session.commit()
   
+  logger.debug(f"Preparing to send approval email to employee {supervised_employee.email}")
+
+  #send notification email with approval
+  try:
+    email_notification = NotificationFactory.create_notification("email")
+    email_subject = "Leave Request Approved"
+    email_message = (f"Dear {supervised_employee.name},\n\n"
+                        f"Your leave request from {leave_request.start_date.strftime('%Y-%m-%d')} to {leave_request.end_date.strftime('%Y-%m-%d')} "
+                        "has been approved by your manager.\n\n"
+                        "Best regards,\n"
+                        )
+    logger.debug(f"Email details - To: {supervised_employee.email}, Subject: {email_subject}, Message: {email_message}")
+
+    email_notification.send(supervised_employee.email, email_subject, email_message)
+    logger.info(f"Leave request email sent to employee {supervised_employee.email}")
+  except Exception as email_error:
+    logger.error(f"Failed to send leave email to employee: {str(email_error)}")
+  
   return jsonify({'message': "Leave request approved successfully", "leave_request": leave_request.to_dict()}), 200
 
 
@@ -120,4 +139,5 @@ def reject_leave(current_user, leave_id):
   leave_request.approved_by = current_user.id
   db.session.commit()
   
+  logger.info("Leave rejected")
   return jsonify({'message': "Unfortunately your leave is rejected due to Business need", "leave_request": leave_request.to_dict()}), 200

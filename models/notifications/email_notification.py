@@ -27,3 +27,16 @@ class EmailNotification(Notification):
         msg.body = message
         mail.send(msg)
         logger.info(f'Email from sender {sender_email} sent to {recipient}')
+
+
+    def send_leave_email(self, recipient, subject, message):
+        """Send an email notification to a recipient"""
+        sender_email = Settings.get_value('email_sender') or Config.MAIL_DEFAULT_SENDER
+        logger.info(f"Sending email to {recipient} with subject '{subject}': {message}")
+        msg = Message(subject=subject,
+                      sender=sender_email,
+                        recipients=[recipient])
+        msg.body = message
+        mail.send(msg)
+        logger.info(f'Email from sender {sender_email} sent to {recipient}')
+

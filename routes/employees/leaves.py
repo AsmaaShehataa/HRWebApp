@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 from web_flask.forms import LeaveRequestForm
 import jwt
 import logging
+from models.notifications.notification_factory import NotificationFactory
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -74,6 +75,24 @@ def submit_leave_request(current_user):
         )
         db.session.add(new_leave_request)
         db.session.commit()
+        
+        leave_email_message = (f"Welcome {current_user.name}!\n"
+                               f"New leave submitted by your employee: {current_user.email},\n" 
+                                    "Please check it out.\n\n"
+                               )
+        # send email notification to from emp to manager 
+        manager = Employee.query.filter_by(id=current_user.head_employee_id).first()
+        if manager:
+            try:
+                email_notification = NotificationFactory.create_notification("email")
+                email_notification.send(manager.email, "New Leave Submitted", leave_email_message)
+                logger.info(f"Leave request email sent to manager {manager.email} for {current_user.email}")
+
+            except Exception as email_error:
+                logger.error(f"Failed to send leave email to manager: {str(email_error)}")
+                
+        else:
+            logger.error(f"Manager not found for employee {current_user.email}")
 
         logger.info(f'Leave request submitted by employee {current_user.email}')
         return jsonify({"message": "Leave request submitted successfully", "leave_request": new_leave_request.to_dict()}), 201

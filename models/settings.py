@@ -20,6 +20,16 @@ class Settings(BaseModel, Base):
         setting = db.session.query(Settings).filter(Settings.key == key).first()
         return setting.value if setting else None
 
+    @staticmethod
+    def set_value(key, value):
+        """Set a setting by key"""
+        setting = db.session.query(Settings).filter(Settings.key == key).first()
+        if setting:
+            setting.value = value
+        else:
+            setting = Settings(key=key, value=value)
+        db.session.add(setting)
+        db.session.commit()
 
     def __init__(self, *args, **kwargs):
         """Initialize the Settings instance"""

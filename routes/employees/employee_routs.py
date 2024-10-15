@@ -151,6 +151,14 @@ def add_employee(current_user):
             flash('Employee already exists', 'danger')
             return jsonify({"error": "Employee already exists"}), 400
     try:
+        # check if the head_employee_id is provided and exists
+        if form.head_employee_id.data:
+            head_employee = Employee.query.filter_by(id=form.head_employee_id.data).first()
+            if head_employee:
+                data['head_employee_id'] = head_employee.id
+            else:
+                return jsonify({'error': 'This manager does not exist'}), 400
+        
         new_employee = Employee(**data)
         #new_employee.password = generate_password_hash(data['password']) #--> set the password and return the hashed
         #new_employee.set_password(data['password']) --> ignore this bec settattr is already implemented in the model and will generate the password hash
